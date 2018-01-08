@@ -21,23 +21,21 @@ int main(void)
 	//This value is a constant for this application
 	addr64 = XBeeAddress64(0x0, BROADCAST_ADDRESS);
 
-		// Create a TX Request
-		//ZBTxRequest zbTx = ZBTxRequest(addr64, datum_buff, sizeof(datum_buff));
+	// Create a TX Request
+	//ZBTxRequest zbTx = ZBTxRequest(addr64, datum_buff, sizeof(datum_buff));
 	packet.id = 0;
-	packet.counter = 0;
 	
 	byte_ptr = (U8 *)&packet;
 		
-		datum.dlc = EIGHT_BYTE;
+	datum.dlc = EIGHT_BYTE;
     while( can_cmd(&datum) != CAN_CMD_ACCEPTED );
 	
     while (1) 
     {	//while( can_cmd(&datum) != CAN_CMD_ACCEPTED );
 		//while( can_cmd(&output) != CAN_CMD_ACCEPTED );
 		//while( can_get_status(&datum) != CAN_STATUS_COMPLETED);
-		packet.id = datum.id.ext;
-		memcpy(packet.datums, datum_buff, 8);
-		packet.counter++;
+		//packet.id = datum.id.ext;
+		//memcpy(packet.datums, datum_buff, 8);
 		// Send your request
 		//ZBTxRequest zbTx = ZBTxRequest(addr64, byte_ptr, sizeof(packet));
 		//xbee.send(zbTx);
@@ -81,12 +79,11 @@ void sys_init(){
 		if( loop_count >= CAN_ERROR_THRESHOLD ) soft_reset();
 	}
 	
+	//enable the can bus interrupts
 	setbit(CANGIE, ENIT);
 	setbit(CANGIE, ENRX);
 	clearbit(CANGIE, ENTX);
 	CANIE = 0xFFFF;
-	
-	//start the system timer
 
 	Enable_interrupt();
 }
@@ -97,8 +94,10 @@ ISR( CANIT_vect){
 	PORTE ^= (1 << PE6);
 	save_canpage =  CANPAGE;
 	
+	//get the message object buffer number
 	mob = can_getMOBInterrupt();
 	
+	//if this wasn't an interrupt triggered by a message
 	if( mob == NOMOB){
 		Enable_interrupt();
 		return;
@@ -119,21 +118,22 @@ ISR( CANIT_vect){
 		Can_get_std_id(packet.id);
 	}
 	
-	can_get_data(packet.datums);
+	//load message data into packet struct
+	can_get_data(packet.datums);	
 	
-	
-#ifdef API_MODE
-	
+	//build xbee data struct 
 	ZBTxRequest zbTx = ZBTxRequest(addr64, byte_ptr, sizeof(packet));
 	xbee.send(zbTx);
-	
+	//delay system to not overload xbee	
 	_delay_ms(10);
 	
-#else
-	uart_mini_printf()
-#endif
 
-	
+
+	/*
+	*	Reset the message object buffer for another 
+	*	message to be received. We have to reset bits in register
+	*	and then reload configuration into the can controller
+	*/
 	save_reg = CANSTMOB;
 	CANSTMOB=0;		// reset INT reason
 	setbit(CANCDMOB, IDE);
@@ -144,7 +144,9 @@ ISR( CANIT_vect){
 	
 	
 	CANPAGE = save_canpage;
+	//toggle the status LED
 	PORTE = (0 << PE6);
+	//renable interrupts
 	Enable_interrupt();
 	
 }

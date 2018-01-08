@@ -76,7 +76,6 @@ enum data_length
 struct xbee_datum{
 	uint32_t id;
 	U8 datums[8];
-	U8 counter;			//this is awful spaghetti code, will refactor all this bullshit later for real project 
 	};
 
 //_____ D E C L A R A T I O N S ________________________________________________
