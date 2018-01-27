@@ -72,6 +72,8 @@ enum data_length
 #define 	clearbit(ADR,BIT)	(ADR&=~(1<<BIT))		// Makro zum Löschen von Bits
 #define 	getbit(ADR, BIT)	(ADR & (1<<BIT))		// Makro zum Abfragen eines Bits
 
+#define API_MODE 1
+
 
 struct xbee_datum{
 	uint32_t id;

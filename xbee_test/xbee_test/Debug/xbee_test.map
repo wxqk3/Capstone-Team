@@ -1025,13 +1025,12 @@ END GROUP
                 0x00800100                PROVIDE (__data_start, .)
  *(.data)
  *(.data*)
- *(.gnu.linkonce.d*)
  *(.rodata)
  *(.rodata*)
  .rodata._ZTV11ZBTxRequest
                 0x00800100        0x8 XBee.o
                 0x00800100                _ZTV11ZBTxRequest
- *(.gnu.linkonce.r*)
+ *(.gnu.linkonce.d*)
                 0x00800108                . = ALIGN (0x2)
                 0x00800108                _edata = .
                 0x00800108                PROVIDE (__data_end, .)
@@ -1121,11 +1120,12 @@ END GROUP
 .stab.indexstr
  *(.stab.indexstr)
 
-.comment        0x00000000       0x30
+.comment        0x00000000       0x60
  *(.comment)
  .comment       0x00000000       0x30 main.o
                                  0x31 (size before relaxing)
- .comment       0x00000030       0x31 XBee.o
+ .comment       0x00000030       0x30 XBee.o
+                                 0x31 (size before relaxing)
 
 .note.gnu.avr.deviceinfo
                 0x00000000       0x40
@@ -1180,12 +1180,12 @@ END GROUP
  .debug_frame   0x00000000      0x3e4 main.o
  .debug_frame   0x000003e4     0x1028 XBee.o
 
-.debug_str      0x00000000     0x3d65
+.debug_str      0x00000000     0x3dc2
  *(.debug_str)
  .debug_str     0x00000000      0x39f C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.1.130/gcc/dev/at90can128/avr51/crtat90can128.o
- .debug_str     0x0000039f     0x1420 main.o
-                               0x1517 (size before relaxing)
- .debug_str     0x000017bf     0x25a6 XBee.o
+ .debug_str     0x0000039f     0x1419 main.o
+                               0x1510 (size before relaxing)
+ .debug_str     0x000017b8     0x260a XBee.o
                                0x369e (size before relaxing)
 
 .debug_loc      0x00000000     0x6ef7

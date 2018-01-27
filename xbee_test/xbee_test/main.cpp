@@ -120,13 +120,18 @@ ISR( CANIT_vect){
 	
 	//load message data into packet struct
 	can_get_data(packet.datums);	
-	
+#ifdef API_MODE
 	//build xbee data struct 
 	ZBTxRequest zbTx = ZBTxRequest(addr64, byte_ptr, sizeof(packet));
 	xbee.send(zbTx);
+#else	
+	for( unsigned int i = 0; i < sizeof(packet); i++){
+		uart_putchar(byte_ptr[i]);
+	}
+#endif	
+	
 	//delay system to not overload xbee	
 	_delay_ms(10);
-	
 
 
 	/*
