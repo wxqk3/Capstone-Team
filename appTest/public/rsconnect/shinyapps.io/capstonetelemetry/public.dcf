@@ -1,0 +1,10 @@
+name: public
+title:
+username:
+account: capstonetelemetry
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 291173
+bundleId: 1247584
+url: https://capstonetelemetry.shinyapps.io/public/
+when: 1519937380.6685
