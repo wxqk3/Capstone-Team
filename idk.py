@@ -6,8 +6,8 @@ xbee = ZigBee(serial_port)
 
 while True:
     try:
-    	frame = xbee.wait_read_frame()
-    	print  (frame["rf_data"])
+        frame = xbee.wait_read_frame()
+        print  (frame["rf_data"])
     except KeyboardInterrupt:
         break
 
