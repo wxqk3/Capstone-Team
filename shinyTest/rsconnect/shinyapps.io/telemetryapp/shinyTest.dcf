@@ -1,0 +1,13 @@
+name: shinyTest
+title: shinyTest
+username:
+account: telemetryapp
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 315526
+bundleId: 1302378
+url: https://telemetryapp.shinyapps.io/shinyTest/
+when: 1522869465.93295
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|firebaseDownloadTest/app.R|shinyTest2/app.R
