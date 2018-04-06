@@ -7,18 +7,18 @@ from time import gmtime, strftime, sleep
 readFile = csv.DictReader(open('../../test.csv', 'r'))
 dictionary = []
 
-MaxTime = 0
+# MaxTime = 0
 # Load all lines into dictionary
 for line in readFile:
-    if MaxTime > 1000:
-        break
-    else:
-        dictionary.append(line)
-    MaxTime = MaxTime+1
+    # if MaxTime > 160000:
+    #     break
+    # else:
+    dictionary.append(line)
+    # MaxTime = MaxTime+1
 # Take every tenth dictionary entry for every tenth of a second
 wantedTimes = dictionary[0::10]
 
-print("Done reading at MaxTime =" + str(MaxTime))
+# print("Done reading at MaxTime =" + str(MaxTime))
 
 # Create timestamp for run upload
 runStartTime = strftime("%m-%d-%Y %H:%M:%S", gmtime())
@@ -31,19 +31,23 @@ fb = firebase.FirebaseApplication(url, None)
 username = "sbwzq8"
 userPath = "user/" + username + "/runs/"
 
+liveData = False
 
 # handle updating current run
-for values in wantedTimes:
-    # result = fb.put('SeansPlayground/Sean/', 'Current Run', values)
-    result = fb.put(userPath, 'Current Run', values)
-    sleep(.01)
+if liveData == True:
+    for values in wantedTimes:
+        # result = fb.put('SeansPlayground/Sean/', 'Current Run', values)
+        result = fb.put(userPath, 'Current Run', values)
+        sleep(.01)
 
 # save run under folder with start time
 result = fb.put(userPath, runStartTime, wantedTimes)
+# print(runStartTime)
 
-# After 10 seconds remove current run
-sleep(10)
-result = fb.delete(userPath, 'Current Run')
+# # After 10 seconds remove current run from database
+if liveData == True:
+    sleep(10)
+    result = fb.delete(userPath, 'Current Run')
 
 
 
