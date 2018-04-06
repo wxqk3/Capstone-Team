@@ -5,15 +5,10 @@ library(fireData)
 library(DT)
 
 result <- download(projectURL = "https://telemetryapp-16f5d.firebaseio.com", fileName = "user")
-
 Logged = FALSE
 
 ui = fluidPage(
-  #conditionalPanel("input.ok == true", 
-  #selectInput("user", "Choose a user:",
-  #            users
-  #)
-  
+  uiOutput("runSwitcher"),
   textOutput("results"),
   DTOutput('tbl')
 )
@@ -26,8 +21,8 @@ server = function(input, output,session) {
   # is TRUE, then display a message that the previous value was invalid.
   dataModal <- function(failed = FALSE) {
     modalDialog(
-      textInput("username", "Username: (test)"),
-      passwordInput("password", "Password: (test)"),
+      textInput("username", "Username:"),
+      passwordInput("password", "Password:"),
       footer = tagList(
         #modalButton("Cancel"),
         actionButton("ok", "OK")
@@ -60,41 +55,19 @@ server = function(input, output,session) {
         values$authenticated <- TRUE
         obs1$suspend()
         removeModal()
-        runs <- names(result[[Username]][["runs"]])
-        insertUI(
-          selector = '#placeholder',
-          ## wrap element in a div with id for ease of removal
-          ui = tags$div(
-            selectInput("run", "Choose a run:",
-                        runs
-            )
+        output$runSwitcher <- renderUI({
+          runs <- names(result[[Username]][["runs"]])
+          selectInput("run", "Choose a run:",
+                      runs
           )
-        )
+        })
         output$tbl = renderDT(
-          result[[Username]][["runs"]][["04-05-2018 20:02:27"]], options = list(lengthChange = FALSE)
+          result[[Username]][["runs"]][[input$run]], options = list(lengthChange = FALSE)
         )
+      } else {
+        print("Nope")
+      }
     }
-    }
-  })
-  
-  # inserted <- c()
-  # observeEvent(input$ok, {
-  #   btn <- input$insertBtn
-  #   id <- paste0('txt', btn)
-  #   insertUI(
-  #     selector = '#placeholder',
-  #     ## wrap element in a div with id for ease of removal
-  #     ui = tags$div(
-  #       tags$p(paste('Element number', btn)), 
-  #       id = id
-  #     )
-  #   )
-  #   inserted <<- c(id, inserted)
-  # })
-  
-  output$dataInfo <- renderPrint({
-    if (values$authenticated) "OK!!!!!"
-    else "You are NOT authenticated"
   })
   
 }

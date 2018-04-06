@@ -5,9 +5,9 @@ account: telemetryapp
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 315661
-bundleId: 1302608
+bundleId: 1304849
 url: https://telemetryapp.shinyapps.io/Telemetry/
-when: 1522878191.76731
+when: 1522964961.87503
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: login/server.R|login/ui.R|login/ui2.R
+ignoredFiles: .RData|login/server.R|login/ui.R|login/ui2.R
