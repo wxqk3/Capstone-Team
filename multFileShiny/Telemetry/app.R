@@ -7,9 +7,18 @@ library(DT)
 result <- download(projectURL = "https://telemetryapp-16f5d.firebaseio.com", fileName = "user")
 Logged = FALSE
 
+vector_y = c()
+vector_x = c()
+vector_y2 = c()
+vector_x2 = c()
+user_type_result=c()
+
+
+
 ui = fluidPage(
   uiOutput("runSwitcher"),
-  textOutput("results"),
+  uiOutput("axisSwitcher"),
+  plotlyOutput('graph1'),
   DTOutput('tbl')
 )
 
@@ -55,15 +64,51 @@ server = function(input, output,session) {
         values$authenticated <- TRUE
         obs1$suspend()
         removeModal()
+        types <- names(result[["aptyt7"]][["runs"]][["04-05-2018 20:02:27"]])
         output$runSwitcher <- renderUI({
+          
           runs <- names(result[[Username]][["runs"]])
           selectInput("run", "Choose a run:",
                       runs
           )
         })
+        output$axisSwitcher <- renderUI({
+          type <- names(result[[Username]][["runs"]][[input$run]])
+          selectInput("type", "Choose a data type to show its graph:",
+                      type
+          )
+          
+        })
         output$tbl = renderDT(
           result[[Username]][["runs"]][[input$run]], options = list(lengthChange = FALSE)
         )
+        
+        output$graph1=renderPlotly({
+          
+          user_result<-result[[Username]][["runs"]][[input$run]]
+          
+            #switching function
+          for(i in 1:length(types)){
+            if(types[i]==input$type){
+              user_type_result<-user_result[i]
+            }
+          }
+          
+          #define vector y 
+          for (i in 1:length(user_type_result[[1]])){
+            vector_y2[i]<-user_type_result[[1]][i]
+          }
+          
+          #define vector x by timestamp
+          user_time_result<-user_result[51]
+          for (i in 1:length(user_time_result[[1]])){
+            vector_x2[i]<-user_time_result[[1]][i]
+          }
+          
+          plot_ly (x = vector_x2,y = vector_y2, type = 'scatter', mode = 'lines' )
+          
+        })
+        
       } else {
         print("Nope")
       }
