@@ -6,6 +6,8 @@ library(DT)
 library(plotly)
 
 result <- download(projectURL = "https://telemetryapp-16f5d.firebaseio.com", fileName = "user")
+
+
 Logged = FALSE
 
 vector_y = c()
@@ -80,7 +82,10 @@ server = function(input, output,session) {
         
         output$graph1=renderPlotly({
           
+          
           user_result<-result[[Username]][["runs"]][[input$run]]
+          new_data <-user_result[order("Time(ms)"), ]
+          print.table(length(new_data))
           
           #user_result[order(user_result[50])]
           
@@ -97,7 +102,7 @@ server = function(input, output,session) {
           }
           
           #define vector x by timestamp
-          user_time_result<-user_result[["time"]]
+          user_time_result<-user_result[[50]]
           for (i in 1:length(user_time_result[[1]])){
             vector_x2[i]<-user_time_result[[1]][i]
           }
@@ -105,8 +110,32 @@ server = function(input, output,session) {
           plot_ly (x = vector_x2,
                    y = vector_y2,
                    type = 'scatter',
-                   mode = 'lines')
+                   mode = 'lines') %>%
+            layout(
+              yaxis = list(
+                       #range = c(0,100)
+                     )
+            )
         })
+        
+        # p <- plot_ly(
+        #   x = c('A12', 'BC2', 109, '12F', 215, 304),
+        #   y = c(1,6,3,5,1,4),
+        #   type = 'bar',
+        #   name = 'Team A',
+        #   text = c('Apples', 'Pears', 'Peaches', 'Bananas', 'Pineapples', 'Cherries')
+        #   ) %>%
+        #   layout(
+        #     title = 'Iventory',
+        #     xaxis = list(
+        #       type = 'category',
+        #       title = 'Product Code'
+        #     ),
+        #     yaxis = list(
+        #       title = '# of Items in Stock',
+        #       range = c(0,7)
+        #     )
+        #   )
         
       } else {
         print("Nope")
