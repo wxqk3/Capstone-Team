@@ -3,6 +3,7 @@ library(shinydashboard)
 library(shiny)
 library(fireData)
 library(DT)
+library(plotly)
 
 result <- download(projectURL = "https://telemetryapp-16f5d.firebaseio.com", fileName = "user")
 Logged = FALSE
@@ -64,7 +65,7 @@ server = function(input, output,session) {
         values$authenticated <- TRUE
         obs1$suspend()
         removeModal()
-        types <- names(result[["aptyt7"]][["runs"]][["04-05-2018 20:02:27"]])
+        types <- names(result[["aptyt7"]][["runs"]][["04-06-2018 23:44:54"]])
         output$runSwitcher <- renderUI({
           
           runs <- names(result[[Username]][["runs"]])
@@ -86,40 +87,35 @@ server = function(input, output,session) {
         )
         
         
-        # output$tbl = renderDT(
-        #   result[[Username]][["runs"]][[input$run]], options = list(lengthChange = FALSE)
-        # )
-        
-        # output$graph1=renderPlotly({
-        #   
-        #   user_result<-result[[Username]][["runs"]][[input$run]]
-        #   
-        #   #user_result[order(user_result)]
-        #   
-        #     #switching function
-        #   for(i in 1:length(types)){
-        #     if(types[i]==input$type){
-        #       user_type_result<-user_result[i]
-        #     }
-        #   }
-        #   
-        #   #define vector y 
-        #   for (i in 1:length(user_type_result[[1]])){
-        #     vector_y2[i]<-user_type_result[[1]][i]
-        #   }
-        #   
-        #   #define vector x by timestamp
-        #   user_time_result<-user_result[51]
-        #   for (i in 1:length(user_time_result[[1]])){
-        #     vector_x2[i]<-user_time_result[[1]][i]
-        #   }
-        #   
-        #   plot_ly (x = vector_x2,
-        #            y = vector_y2, 
-        #            type = 'scatter', 
-        #            mode = 'lines' )
-        #   
-        # })
+        output$graph1=renderPlotly({
+
+          user_result<-result[[Username]][["runs"]][[input$run]]
+
+          #user_result[order(user_result[50])]
+
+            #switching function
+          for(i in 1:length(types)){
+            if(types[i]==input$type){
+              user_type_result<-user_result[i]
+            }
+          }
+
+          #define vector y
+          for (i in 1:length(user_type_result[[1]])){
+            vector_y2[i]<-user_type_result[[1]][i]
+          }
+
+          #define vector x by timestamp
+          user_time_result<-user_result[["time"]]
+          for (i in 1:length(user_time_result[[1]])){
+            vector_x2[i]<-user_time_result[[1]][i]
+          }
+
+          plot_ly (x = vector_x2,
+                   y = vector_y2,
+                   type = 'scatter',
+                   mode = 'lines')
+        })
         
       } else {
         print("Nope")
