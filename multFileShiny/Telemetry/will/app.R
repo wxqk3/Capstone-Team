@@ -55,9 +55,9 @@ server = function(input, output) {
       vector_x2[i]<-user_time_result[[1]][i]
       
     }
-
+    
     plot_ly (x = vector_x2,y = vector_y2, type = 'scatter', mode = 'lines' )
-   
+    
   })
   
 }

@@ -19,7 +19,7 @@ ui = fluidPage(
   uiOutput("runSwitcher"),
   uiOutput("axisSwitcher"),
   plotlyOutput('graph1'),
-  DTOutput('tbl')
+  dataTableOutput('tbl')
 )
 
 server = function(input, output,session) {
@@ -79,35 +79,47 @@ server = function(input, output,session) {
           )
           
         })
-        output$tbl = renderDT(
-          result[[Username]][["runs"]][[input$run]], options = list(lengthChange = FALSE)
+        output$tbl <- renderDataTable(
+          result[[Username]][["runs"]][[input$run]], options = list(
+            scrollY = '300px', paging = FALSE 
+          )
         )
         
-        output$graph1=renderPlotly({
-          
-          user_result<-result[[Username]][["runs"]][[input$run]]
-          
-            #switching function
-          for(i in 1:length(types)){
-            if(types[i]==input$type){
-              user_type_result<-user_result[i]
-            }
-          }
-          
-          #define vector y 
-          for (i in 1:length(user_type_result[[1]])){
-            vector_y2[i]<-user_type_result[[1]][i]
-          }
-          
-          #define vector x by timestamp
-          user_time_result<-user_result[51]
-          for (i in 1:length(user_time_result[[1]])){
-            vector_x2[i]<-user_time_result[[1]][i]
-          }
-          
-          plot_ly (x = vector_x2,y = vector_y2, type = 'scatter', mode = 'lines' )
-          
-        })
+        
+        # output$tbl = renderDT(
+        #   result[[Username]][["runs"]][[input$run]], options = list(lengthChange = FALSE)
+        # )
+        
+        # output$graph1=renderPlotly({
+        #   
+        #   user_result<-result[[Username]][["runs"]][[input$run]]
+        #   
+        #   #user_result[order(user_result)]
+        #   
+        #     #switching function
+        #   for(i in 1:length(types)){
+        #     if(types[i]==input$type){
+        #       user_type_result<-user_result[i]
+        #     }
+        #   }
+        #   
+        #   #define vector y 
+        #   for (i in 1:length(user_type_result[[1]])){
+        #     vector_y2[i]<-user_type_result[[1]][i]
+        #   }
+        #   
+        #   #define vector x by timestamp
+        #   user_time_result<-user_result[51]
+        #   for (i in 1:length(user_time_result[[1]])){
+        #     vector_x2[i]<-user_time_result[[1]][i]
+        #   }
+        #   
+        #   plot_ly (x = vector_x2,
+        #            y = vector_y2, 
+        #            type = 'scatter', 
+        #            mode = 'lines' )
+        #   
+        # })
         
       } else {
         print("Nope")
