@@ -106,7 +106,8 @@ server = function(input, output,session) {
           }
 
           #define vector x by timestamp
-          user_time_result<-user_result[51]
+          user_time_result<-user_result[50]
+          
           for (i in 1:length(user_time_result[[1]])){
             vector_x2[i]<-user_time_result[[1]][i]
          #   vector_x2[i]<-vector_x2[i]
@@ -117,22 +118,22 @@ server = function(input, output,session) {
           
          
           
-          for (i in 1:length(user_type_result[[1]])){
-            new_x2[i]<-i*0.1-0.1
-            #print(vector_y2[i])
-          }
+          # for (i in 1:length(user_type_result[[1]])){
+          #   new_x2[i]<-i*0.1-0.1
+          #   #print(vector_y2[i])
+          # }
           
-          print(vector_x2)
-          print(new_x2)
+          #print(vector_x2)
+          #print(new_x2)
           
-          #  print(user_type_result)
+            print(vector_x2)
           
-          print(vector_y2)
+          #print(vector_y2)
           
           
          #
         # print(user_time_result)
-          plot_ly (x = new_x2,y = vector_y2, type = 'scatter', mode = 'lines' )
+          plot_ly (x = vector_x2,y = vector_y2, type = 'scatter', mode = 'lines' )
 
         })
         
