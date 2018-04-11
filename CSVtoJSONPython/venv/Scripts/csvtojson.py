@@ -1,33 +1,55 @@
+# change time to seconds
+# change key Time to lowercase time
+# vertical acceleration
+# auxilliary, flpot, frpot, rrpot, rlpot, gps time, gearbox post cooler, throttle pos
 import csv
 # import json
 from firebase import firebase
 from time import gmtime, strftime, sleep
 import collections
+import sys
 
 # Create dictionary of key/value pairs from file
 readFile = csv.DictReader(open('../../test.csv', 'r'))
 dictionary = []
 
+upload = True
+liveData = False
+
 MaxTime = 0
 # Load all lines into dictionary
 for line in readFile:
-    if MaxTime < 500:
+    if MaxTime < 28502:
         dictionary.append(line)
         # print(dictionary[MaxTime])
-        dictionary[MaxTime]["Time(ms)"] = str(int(float(dictionary[MaxTime]["Time(ms)"]) * 1000))
+        # dictionary[MaxTime]["Time(ms)"] = str(int(float(dictionary[MaxTime]["Time(ms)"]) * 1000))
+        # dictionary[MaxTime]["Time(s)"] = (float(dictionary[MaxTime]["Time(s)"]))
+        for key in dictionary[MaxTime]:
+            # print(key)
+            if dictionary[MaxTime][key] == 'N/a':
+                dictionary[MaxTime][key] = 0
+            else:
+                dictionary[MaxTime][key] = float("{0:.2f}".format(float(dictionary[MaxTime][key])))
+        # print(dictionary[MaxTime])
         MaxTime = MaxTime+1
     else:
         break
+
+
 
 # for entry in dictionary:
 #     print(entry)
 
 # Take every tenth dictionary entry for every tenth of a second
 # wantedTimes = dictionary[0::10]
+
 wantedTimes = dictionary
-wantedTimes = range(dictionary[500], dictionary[1000])
-# print(dictionary)
-# print("Done reading at MaxTime =" + str(MaxTime))
+
+# print(wantedTimes)
+
+# for sub in wantedTimes:
+#     for key in sub:
+#         sub[key] = int(sub[key])
 
 # Create timestamp for run upload
 runStartTime = strftime("%m-%d-%Y %H:%M:%S", gmtime())
@@ -40,8 +62,6 @@ fb = firebase.FirebaseApplication(url, None)
 username = "aptyt7"
 userPath = "user/" + username + "/runs/"
 
-liveData = False
-
 # handle updating current run
 if liveData:
     i = 0
@@ -50,12 +70,11 @@ if liveData:
         result = fb.put(userPath, 'Current Run/'+str(i), values)
 
         i = i+1
-        sleep(.1)
+        sleep(.5)
 
 # save run under folder with start time
-# result = fb.put(userPath, runStartTime, wantedTimes)
-
-# print(runStartTime)
+if upload:
+    result = fb.put(userPath, runStartTime, wantedTimes)
 
 # fb.delete(userPath, '')
 
