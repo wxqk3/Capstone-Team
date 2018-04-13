@@ -1,0 +1,81 @@
+#
+# This is a Shiny web application. You can run the application by clicking
+# the 'Run App' button above.
+#
+# Find out more about building applications with Shiny here:
+#
+#    http://shiny.rstudio.com/
+#
+
+library(shiny)
+library(shinyjs)
+library(fireData)
+library(googleAuthR)
+library(googleID)
+
+options(googleAuthR.scopes.selected = c("https://www.googleapis.com/auth/userinfo.email",
+                                        "https://www.googleapis.com/auth/userinfo.profile"))
+options("googleAuthR.webapp.client_id" = "177279185734-qf4f0b5shcf8im7cq4pjg3bgvf8vkv3v.apps.googleusercontent.com")
+options("googleAuthR.webapp.client_secret" = "Upf9dN0AiXf8vZKXP0t43Qit")
+
+# Define UI for application that draws a histogram
+ui <- navbarPage(
+  title = "App Name",
+  windowTitle = "Browser window title",
+  tabPanel("Tab 1",
+           useShinyjs(),
+           sidebarLayout(
+             sidebarPanel(
+               p("Welcome!"),
+               googleAuthUI("gauth_login")
+             ),
+             mainPanel(
+               textOutput("display_username")
+             )
+           )
+  ),
+  tabPanel("Tab 2",
+           p("Layout for tab 2")
+  )
+)
+
+server <- function(input, output, session) {
+  ## Global variables needed throughout the app
+  rv <- reactiveValues(
+    login = FALSE
+  )
+  
+  ## Authentication
+  accessToken <- callModule(googleAuth, "gauth_login",
+                            login_class = "btn btn-primary",
+                            logout_class = "btn btn-primary")
+  userDetails <- reactive({
+    validate(
+      need(accessToken(), "not logged in")
+    )
+    rv$login <- TRUE
+    with_shiny(get_user_info, shiny_access_token = accessToken())
+  })
+  
+  ## Display user's Google display name after successful login
+  output$display_username <- renderText({
+    validate(
+      need(userDetails(), "getting user details")
+    )
+    userDetails()$displayName
+    # print(userDetails()$emails[1]$value)
+    pythonStringCall <- paste("python sendInfo.py ", userDetails()$emails[1]$value)
+    system(pythonStringCall)
+    # upload(userDetails()$emails[1]$value, "https://telemetryapp-16f5d.firebaseio.com", "user/sbwzq8/tokentest")
+  })
+  
+  ## Workaround to avoid shinyaps.io URL problems
+  observe({
+    if (rv$login) {
+      shinyjs::onclick("gauth_login-googleAuthUi",
+                       shinyjs::runjs("window.location.href = 'https://yourdomain.shinyapps.io/appName';"))
+    }
+  })
+}
+
+shinyApp(ui = ui, server = server)

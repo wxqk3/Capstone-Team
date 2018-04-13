@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1522959460262.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1267315030",
+    "id" : "9EB13816",
+    "lastKnownWriteTime" : 1522983541,
+    "last_content_update" : 1522983541856,
+    "path" : "~/Shiny Projects/Telemetry/app.R",
+    "project_path" : "app.R",
+    "properties" : {
+        "cursorPosition" : "67,28",
+        "scrollLine" : "47"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
