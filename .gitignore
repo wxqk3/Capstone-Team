@@ -122,3 +122,5 @@ celerybeat-schedule
 
 # mypy
 .mypy_cache/
+
+.httr-oauth
