@@ -5,14 +5,17 @@ library(fireData)
 library(DT)
 library(plotly)
 
-result <- download(projectURL = "https://telemetryapp-16f5d.firebaseio.com", fileName = "user")
-Logged = FALSE
+result<- download(projectURL = "https://telemetryapp-16f5d.firebaseio.com", fileName = "user")
+#result <- download(projectURL = "https://telemetryapp-16f5d.firebaseio.com", fileName = "user")
 
 type <- names(result[[4]][["runs"]][[1]])
+Logged = FALSE
+n<-1
 vector_y2 = c()
 vector_x2 = c()
 new_x2=c()
 
+refresh<-1
 
 user_type_result=c()
 ui = fluidPage(
@@ -25,6 +28,8 @@ ui = fluidPage(
 )
 
 server = function(input, output,session) {
+  
+  #invalidateLater(1000, session)
   
   values <- reactiveValues(authenticated = FALSE)
   
@@ -82,12 +87,26 @@ server = function(input, output,session) {
           
           
         )
+        #-----------------------------------4/12 version
+       
+        dataInput <- reactive({
+         invalidateLater(6000, session)
+          print("data_is_changing")
+          # n<- download(projectURL = "https://telemetryapp-16f5d.firebaseio.com", fileName = "user/wxqk3/runs/Current Run")
+         #  print(n)
+          result_changing<- download(projectURL = "https://telemetryapp-16f5d.firebaseio.com", fileName = "user")
+           return(result_changing)
+         
+        })
+        
         
         output$graph1=renderPlotly({
-
-
-
-          user_result<-result[[Username]][["runs"]][[input$run]]
+         invalidateLater(6000, session)
+          result_changing<-dataInput()
+          print("graph_is_changing")
+       
+          user_result<-result_changing[[Username]][["runs"]][[input$run]]
+          #user_result<-result[[Username]][["runs"]][[input$run]]
       #   print(user_result)
 
           #  switching function
@@ -97,6 +116,11 @@ server = function(input, output,session) {
             }
 
           }
+          
+          #switching function 2 for switching runs
+          
+          
+          
 
           #define vector y
           for (i in 1:length(user_type_result[[1]])){
@@ -106,7 +130,7 @@ server = function(input, output,session) {
           }
 
           #define vector x by timestamp
-          user_time_result<-user_result[50]
+          user_time_result<-user_result["Time(s)"]
           
           for (i in 1:length(user_time_result[[1]])){
             vector_x2[i]<-user_time_result[[1]][i]
@@ -123,12 +147,12 @@ server = function(input, output,session) {
           #   #print(vector_y2[i])
           # }
           
-          #print(vector_x2)
+          print(vector_x2)
           #print(new_x2)
           
-            print(vector_x2)
+         #   print(vector_x2)
           
-          #print(vector_y2)
+          print(vector_y2)
           
           
          #
