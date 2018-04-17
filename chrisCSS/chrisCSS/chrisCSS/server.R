@@ -73,7 +73,7 @@ server = function(input, output,session) {
         })
         output$tbl <- renderDataTable(
           result[[Username]][["runs"]][[input$run]], options = list(
-            scrollY = '300px', paging = FALSE 
+            #scrollY = '300px', paging = FALSE 
           )
         )
         
