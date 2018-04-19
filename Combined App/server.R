@@ -69,14 +69,14 @@ shinyServer(function(input, output) {
         )
         
         output$uploadButton <- renderUI({
-          sidebarPanel(
+          
             # Input: Select a file ----
             inFile <- fileInput("file1", "Choose CSV File",
                                 multiple = FALSE,
                                 accept = c("text/csv",
                                            "text/comma-separated-values,text/plain",
                                            ".csv")
-            ),
+            ,
             if(!is.null(input$file1)){
               # print("Input not null")
               # print(input$file1$datapath)

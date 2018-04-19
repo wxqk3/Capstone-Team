@@ -7,28 +7,25 @@ library(plotly)
 
 shinyUI( 
   bootstrapPage( 
+    theme = shinytheme("united"),
     navbarPage("Telemetry etc.", 
                tabPanel("Something"), 
                tabPanel("Something Else"),  
                tabPanel("Idk") 
     ), 
-     
-    theme = shinytheme("united"),
     fluidPage(
-       sidebarLayout(
-         sidebarPanel(
-           
-         ),
-        mainPanel(
+      sidebarLayout(
+        sidebarPanel(
           uiOutput("uploadButton"),
           uiOutput("runSwitcher"),
-          uiOutput("typeSwitcher"),
+          uiOutput("typeSwitcher")
+        ),
+        mainPanel(
           textOutput("results"),
           plotlyOutput('graph1'),
           div(style = 'overflow-x: scroll', DT::dataTableOutput('table'))
-        
         )
-       )
+      )
     )
   )
 ) 
