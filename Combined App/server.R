@@ -13,7 +13,7 @@ vector_x2 = c()
 new_x2=c()
 user_type_result=c()
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
    
   values <- reactiveValues(authenticated = FALSE)
   
@@ -45,7 +45,7 @@ shinyServer(function(input, output) {
     
     user = paste("user/", Username, sep = "")
     
-    result <- download(projectURL = "https://telemetryapp-16f5d.firebaseio.com", fileName = user)
+    result <- download(projectURL = "https://telemetryapp2.firebaseio.com", fileName = user)
     type <- names(result[[2]][[1]])
     pass_confirm <- names(result[["key"]])
     
@@ -78,8 +78,6 @@ shinyServer(function(input, output) {
                                            ".csv")
             ,
             if(!is.null(input$file1)){
-              # print("Input not null")
-              # print(input$file1$datapath)
               command = "python"
               # relative path to python parser/datasim script
               pathToScript= "csvtojson.py"
@@ -91,29 +89,39 @@ shinyServer(function(input, output) {
           )
         })
         
+        dataInput <- reactive({
+          invalidateLater(6000, session)
+          print("data_is_changing")
+          result_changing<- download(projectURL = "https://telemetryapp2.firebaseio.com", fileName = "user")
+          return(result_changing)
+        })
+        
         output$graph1=renderPlotly({
+          invalidateLater(6000, session)
+          result_changing<-dataInput()
+          print("graph_is_changing")
           
-          user_result<-result[["runs"]][[input$run]]
+          user_result<-result_changing[[Username]][["runs"]][[input$run]]
           
           #  switching function
-          # for(i in 1:length(type)){
-          #   if(type[i]==input$type){
-          #     user_type_result<-user_result[i]
-          #   }
-          # 
-          # }
-          
+          for(i in 1:length(type)){
+            if(type[i]==input$type){
+              user_type_result<-user_result[i]
+            }
+            
+          }
+
           #define vector y
           for (i in 1:length(user_type_result[[1]])){
-            vector_y2[i]<-user_type_result[i]
+            vector_y2[i]<-user_type_result[[1]][i]
           }
+        
+          user_time_result<-user_result["Time(s)"]
           
-          #define vector x by timestamp
-          user_time_result<-user_result[50]
           for (i in 1:length(user_time_result[[1]])){
-            vector_x2[i]<-user_time_result[i]
+            vector_x2[i]<-user_time_result[[1]][i]
           }
-          
+
           plot_ly (x = vector_x2,y = vector_y2, type = 'scatter', mode = 'lines' )
           
         })
@@ -121,11 +129,9 @@ shinyServer(function(input, output) {
         output$table <- DT::renderDataTable(
           result[["runs"]][[input$run]],
           options = list(
-            pageLength=5000,
-            lengthChange = FALSE
-            #scrollY = '400px'
-            #scrollCollapse = TRUE
-            #paging: FALSE
+            scrollX = TRUE,
+            scrollY = '300px', 
+            paging = FALSE
           )
         )
         

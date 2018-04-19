@@ -8,24 +8,21 @@ library(plotly)
 shinyUI( 
   bootstrapPage( 
     theme = shinytheme("united"),
-    navbarPage("Telemetry etc.", 
-               tabPanel("Something"), 
-               tabPanel("Something Else"),  
-               tabPanel("Idk") 
-    ), 
+    navbarPage("Telemetry"), 
     fluidPage(
       sidebarLayout(
         sidebarPanel(
           uiOutput("uploadButton"),
           uiOutput("runSwitcher"),
-          uiOutput("typeSwitcher")
+          uiOutput("typeSwitcher"),
+          uiOutput("addLineButton")
         ),
         mainPanel(
           textOutput("results"),
-          plotlyOutput('graph1'),
-          div(style = 'overflow-x: scroll', DT::dataTableOutput('table'))
+          plotlyOutput('graph1')
         )
-      )
+      ),
+      div(style = 'overflow-x: scroll', DT::dataTableOutput('table'))
     )
   )
 ) 
