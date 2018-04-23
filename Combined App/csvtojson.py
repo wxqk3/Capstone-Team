@@ -10,18 +10,18 @@ def main():
         # Can't pass directly to csv.DictReader
 
         # path passed from R
-        # path = sys.argv[1]
+        path = sys.argv[1]
 
         # hardcoded path from filesystem
-        path = "../../test.csv"
+        # path = "../../test.csv"
 
         # Hardcoded usernames
         # username = "sbwzq8"
         # username = "aptyt7"
-        username = "wxqk3"
+        # username = "wxqk3"
 
         # username passed from R
-        # username = sys.argv[2]
+        username = sys.argv[2]
 
         # Create dictionary of key/value pairs from file
         # readFile = csv.DictReader(open("../test.csv"))
@@ -31,31 +31,27 @@ def main():
         upload = True
         liveData = False
 
+        # 28502 MaxTime
         StartTime = 10000
         EndTime = 12600
         DictIndex = 0
 
         # Load all lines into dictionary
         for line in readFile:
-            #28502
             if DictIndex >= StartTime and DictIndex <= EndTime:
                 dictionary.append(line)
-                # print(dictionary[DictIndex])
-                # dictionary[DictIndex]["Time(ms)"] = str(int(float(dictionary[DictIndex]["Time(ms)"]) * 1000))
-                # dictionary[DictIndex]["Time(s)"] = (float(dictionary[DictIndex]["Time(s)"]))
                 for key in dictionary[DictIndex-StartTime]:
-                    # print(key)
                     if dictionary[DictIndex-StartTime][key] == 'N/a':
                         dictionary[DictIndex-StartTime][key] = 0
                     else:
                         dictionary[DictIndex-StartTime][key] = float("{0:.2f}".format(float(dictionary[DictIndex-StartTime][key])))
-                # print(dictionary[DictIndex])
                 DictIndex = DictIndex+1
             elif DictIndex < StartTime:
                 DictIndex = DictIndex+1
             else:
                 break
-        # Doctor time 
+
+        # Block to doctor time
         # time = 0
         # for key in dictionary:
         #     key["Time(s)"] = time
