@@ -10,28 +10,29 @@ def main():
         # Can't pass directly to csv.DictReader
 
         # path passed from R
-        path = sys.argv[1]
+        # path = sys.argv[1]
 
         # hardcoded path from filesystem
-        # path = "../../test.csv"
+        path = "../../test.csv"
 
         # Hardcoded usernames
         # username = "sbwzq8"
         # username = "aptyt7"
+        username = "wxqk3"
 
         # username passed from R
-        username = sys.argv[2]
+        # username = sys.argv[2]
 
         # Create dictionary of key/value pairs from file
         # readFile = csv.DictReader(open("../test.csv"))
         readFile = csv.DictReader(open(path))
         dictionary = []
 
-        upload = False
-        liveData = True
+        upload = True
+        liveData = False
 
-        StartTime = 7400
-        EndTime = 10000
+        StartTime = 10000
+        EndTime = 12600
         DictIndex = 0
 
         # Load all lines into dictionary
@@ -54,13 +55,19 @@ def main():
                 DictIndex = DictIndex+1
             else:
                 break
+        # Doctor time 
+        # time = 0
+        # for key in dictionary:
+        #     key["Time(s)"] = time
+        #     time = round(time + 0.01, 2)
+        #     print(key)
 
         # Take every hundredth dictionary entry for every second
-        wantedTimes = dictionary[0::100]
+        # wantedTimes = dictionary[0::100]
         sleepfactor = 0.82
 
         # Take every tenth dictionary entry for every tenth of a second
-        # wantedTimes = dictionary[0::10]
+        wantedTimes = dictionary[0::10]
         # sleepfactor = 0.00000001
 
         # Take every dictionary entry for every hundredth of a second
