@@ -1,102 +1,108 @@
-# change time to seconds
-# change key Time to lowercase time
-# vertical acceleration
-# auxilliary, flpot, frpot, rrpot, rlpot, gps time, gearbox post cooler, throttle pos
+
 import csv
-# import json
 from firebase import firebase
 from time import gmtime, strftime, sleep
-import collections
 import sys
-
+# from apscheduler.schedulers.background import BackgroundScheduler
 def main():
-    # for some reason the sys.argv[1] needs to be placed in a string.
-    # Can't pass directly to csv.DictReader
-    path = sys.argv[1]
+    try:
+        # for some reason the string in sys.argv[1] needs to be placed in a variable before it can be interpolated.
+        # Can't pass directly to csv.DictReader
 
-    # Create dictionary of key/value pairs from file
-    # readFile = csv.DictReader(open("../test.csv"))
-    readFile = csv.DictReader(open(path))
-    dictionary = []
+        # path passed from R
+        path = sys.argv[1]
 
-    upload = True
-    liveData = False
+        # hardcoded path from filesystem
+        # path = "../../test.csv"
 
-    MaxTime = 0
-    # Load all lines into dictionary
-    for line in readFile:
-        #28502
-        if MaxTime < 100:
-            dictionary.append(line)
-            # print(dictionary[MaxTime])
-            # dictionary[MaxTime]["Time(ms)"] = str(int(float(dictionary[MaxTime]["Time(ms)"]) * 1000))
-            # dictionary[MaxTime]["Time(s)"] = (float(dictionary[MaxTime]["Time(s)"]))
-            for key in dictionary[MaxTime]:
-                # print(key)
-                if dictionary[MaxTime][key] == 'N/a':
-                    dictionary[MaxTime][key] = 0
-                else:
-                    dictionary[MaxTime][key] = float("{0:.2f}".format(float(dictionary[MaxTime][key])))
-            # print(dictionary[MaxTime])
-            MaxTime = MaxTime+1
-        else:
-            break
+        # Hardcoded usernames
+        # username = "sbwzq8"
+        # username = "aptyt7"
 
+        # username passed from R
+        username = sys.argv[2]
 
+        # Create dictionary of key/value pairs from file
+        # readFile = csv.DictReader(open("../test.csv"))
+        readFile = csv.DictReader(open(path))
+        dictionary = []
 
-    # for entry in dictionary:
-    #     print(entry)
+        upload = False
+        liveData = True
 
-    # Take every tenth dictionary entry for every tenth of a second
-    # wantedTimes = dictionary[0::10]
+        StartTime = 7400
+        EndTime = 10000
+        DictIndex = 0
 
-    wantedTimes = dictionary
+        # Load all lines into dictionary
+        for line in readFile:
+            #28502
+            if DictIndex >= StartTime and DictIndex <= EndTime:
+                dictionary.append(line)
+                # print(dictionary[DictIndex])
+                # dictionary[DictIndex]["Time(ms)"] = str(int(float(dictionary[DictIndex]["Time(ms)"]) * 1000))
+                # dictionary[DictIndex]["Time(s)"] = (float(dictionary[DictIndex]["Time(s)"]))
+                for key in dictionary[DictIndex-StartTime]:
+                    # print(key)
+                    if dictionary[DictIndex-StartTime][key] == 'N/a':
+                        dictionary[DictIndex-StartTime][key] = 0
+                    else:
+                        dictionary[DictIndex-StartTime][key] = float("{0:.2f}".format(float(dictionary[DictIndex-StartTime][key])))
+                # print(dictionary[DictIndex])
+                DictIndex = DictIndex+1
+            elif DictIndex < StartTime:
+                DictIndex = DictIndex+1
+            else:
+                break
 
-    # print(wantedTimes)
+        # Take every hundredth dictionary entry for every second
+        wantedTimes = dictionary[0::100]
+        sleepfactor = 0.82
 
-    # for sub in wantedTimes:
-    #     for key in sub:
-    #         sub[key] = int(sub[key])
+        # Take every tenth dictionary entry for every tenth of a second
+        # wantedTimes = dictionary[0::10]
+        # sleepfactor = 0.00000001
 
-    # Create timestamp for run upload
-    runStartTime = strftime("%m-%d-%Y %H:%M:%S", gmtime())
+        # Take every dictionary entry for every hundredth of a second
+        # wantedTimes = dictionary
 
-    # open connection to database
-    url = "https://telemetryapp-16f5d.firebaseio.com"
-    fb = firebase.FirebaseApplication(url, None)
+        # Create timestamp for run upload
+        runStartTime = strftime("%m-%d-%Y %H:%M:%S", gmtime())
 
-    # username and path to user for database
-    # username = "sbwzq8"
-    username = sys.argv[2]
-    userPath = "user/" + username + "/runs/"
+        # open connection to database
+        url = "https://telemetryapp2.firebaseio.com"
+        fb = firebase.FirebaseApplication(url, None)
 
-    # handle updating current run
-    if liveData:
-        i = 0
-        for values in wantedTimes:
-            # result = fb.put('SeansPlayground/Sean/', 'Current Run', values)
-            result = fb.put(userPath, 'Current Run/'+str(i), values)
+        # Create path to users runs folder
+        userPath = "user/" + username + "/runs/"
 
-            i = i+1
-            sleep(.5)
+        # handle updating current run
+        if liveData:
+            i = 0
+            for values in wantedTimes:
+                result = fb.put(userPath, 'Current Run/'+str(i), values)
+                i = i+1
+                # sleep(sleepfactor)
 
-    # save run under folder with start time
-    if upload:
-        result = fb.put(userPath, runStartTime, wantedTimes)
+        # save run under folder with start time
+        if upload:
+            result = fb.put(userPath, runStartTime, wantedTimes)
 
-    # fb.delete(userPath, '')
+        # After 10 seconds remove current run from database
+        if liveData:
+            sleep(5)
+            result = fb.delete(userPath, 'Current Run')
 
-    # After 10 seconds remove current run from database
-    if liveData:
-        sleep(10)
+        # deprecated, don't need json
+        # with open('../../test.json', 'w') as writeFile:
+        #     json.dump(wantedTimes, writeFile, indent=2)
+        #     print("Dumping Data")
+
+    # in the event of an error(most likely firebase killing the connection)
+    # tell firebase to delete the current run node.
+    finally:
         result = fb.delete(userPath, 'Current Run')
 
 
-
-
-    # deprecated, don't need json
-    # with open('../../test.json', 'w') as writeFile:
-    #     json.dump(wantedTimes, writeFile, indent=2)
-    #     print("Dumping Data")
 if __name__ == "__main__":
     main()
