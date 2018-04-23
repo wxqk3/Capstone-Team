@@ -7,6 +7,8 @@ library(plotly)
 
 Logged = FALSE
 
+runNumber = 1
+lines = 1
 result = c()
 vector_y2 = c()
 vector_x2 = c()
@@ -44,10 +46,14 @@ shinyServer(function(input, output, session) {
     })
     
     user = paste("user/", Username, sep = "")
+    #user2 = paste(user, "[[runs]][[1]]", sep = "")
     
     result <- download(projectURL = "https://telemetryapp2.firebaseio.com", fileName = user)
-    type <- names(result[[2]][[1]])
+    type <- names(result[["runs"]][[1]])
     pass_confirm <- names(result[["key"]])
+    
+    # runNames = paste("user/", Username, "/runs", sep = "")
+    # runs <- names(download(projectURL = "https://telemetryapp2.firebaseio.com", fileName = runNames))
     
     if (length(pass_confirm) > 0 & length(Password) > 0) {
       if (pass_confirm == Password) {
@@ -63,6 +69,7 @@ shinyServer(function(input, output, session) {
           )
         })
         output$typeSwitcher <- renderUI(
+          #HTML("<br>"),
           selectInput("type", "Choose a type:",
                       type
           )
@@ -89,40 +96,88 @@ shinyServer(function(input, output, session) {
           )
         })
         
+        # output$addLineButton <- renderUI({
+        #   actionButton("newRun", "Compare Run")
+        # })
+        
+        observeEvent(input$newRun, {
+          runNumber = 2
+          runs <- names(result[["runs"]])
+          insertUI(
+            selector = "#newRun",
+            where = "afterEnd",
+            ui = selectInput("run2", "Choose a second run:",
+                        runs
+            )
+          )
+          removeUI(
+            selector = "#newRun"
+          )
+        })
+        
+
         dataInput <- reactive({
           invalidateLater(6000, session)
           print("data_is_changing")
-          result_changing<- download(projectURL = "https://telemetryapp2.firebaseio.com", fileName = "user")
-          return(result_changing)
+          result <- download(projectURL = "https://telemetryapp2.firebaseio.com", fileName = user)
+          return(result)
         })
         
         output$graph1=renderPlotly({
           invalidateLater(6000, session)
-          result_changing<-dataInput()
+          result<-dataInput()
           print("graph_is_changing")
           
-          user_result<-result_changing[[Username]][["runs"]][[input$run]]
+          user_result<-result[["runs"]][[input$run]]
           
-          #  switching function
-          for(i in 1:length(type)){
-            if(type[i]==input$type){
-              user_type_result<-user_result[i]
+          if (runNumber == 1) {
+            #  switching function
+            for(i in 1:length(type)){
+              if(type[i]==input$type){
+                user_type_result<-user_result[i]
+              }
             }
             
+            #define vector y
+            for (i in 1:length(user_type_result[[1]])){
+              vector_y2[i]<-user_type_result[[1]][i]
+            }
+            
+            user_time_result<-user_result["Time(s)"]
+            
+            for (i in 1:length(user_time_result[[1]])){
+              vector_x2[i]<-user_time_result[[1]][i]
+            }
+            
+            plot_ly (x = vector_x2,y = vector_y2, type = 'scatter', mode = 'lines' )
+            
+          } else if (lineNumber == 2) {
+            user_result2<-result[["runs"]][[input$run2]]
+            #  switching function
+            for(i in 1:length(type)){
+              if(type[i]==input$type){
+                user_type_result<-user_result[i]
+                user_type_result2<-user_result2[i]
+              }
+            }
+            
+            #define vector y
+            for (i in 1:length(user_type_result[[1]])){
+              vector_y2[i]<-user_type_result[[1]][i]
+              vextor_y3[i]<-user_type_result2[[1]][i]
+            }
+            
+            user_time_result<-user_result["Time(s)"]
+            
+            for (i in 1:length(user_time_result[[1]])){
+              vector_x2[i]<-user_time_result[[1]][i]
+            }
+            
+            plot_ly (x = vector_x2,y = vector_y2, type = 'scatter', mode = 'lines' ) %>%
+              add_trace(y = vector_y3, name = 'trace 1', mode = 'lines+markers')
           }
-
-          #define vector y
-          for (i in 1:length(user_type_result[[1]])){
-            vector_y2[i]<-user_type_result[[1]][i]
-          }
-        
-          user_time_result<-user_result["Time(s)"]
           
-          for (i in 1:length(user_time_result[[1]])){
-            vector_x2[i]<-user_time_result[[1]][i]
-          }
-
-          plot_ly (x = vector_x2,y = vector_y2, type = 'scatter', mode = 'lines' )
+          
           
         })
         

@@ -14,8 +14,13 @@ shinyUI(
         sidebarPanel(
           uiOutput("uploadButton"),
           uiOutput("runSwitcher"),
-          uiOutput("typeSwitcher"),
-          uiOutput("addLineButton")
+          div(
+            actionButton("newRun", "Compare Run")
+          ),
+          div(
+            br(),
+            uiOutput("typeSwitcher")
+          )
         ),
         mainPanel(
           textOutput("results"),
