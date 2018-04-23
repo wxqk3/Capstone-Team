@@ -7,11 +7,12 @@ library(plotly)
 
 Logged = FALSE
 
-runNumber = 1
+runNumber <<- 0
 lines = 1
 result = c()
 vector_y2 = c()
 vector_x2 = c()
+vector_y3 = c()
 new_x2=c()
 user_type_result=c()
 
@@ -23,8 +24,13 @@ shinyServer(function(input, output, session) {
   # is TRUE, then display a message that the previous value was invalid.
   dataModal <- function(failed = FALSE) {
     modalDialog(
+      size = "l",
+      
       textInput("username", "Username:"),
       passwordInput("password", "Password:"),
+      if (failed) {
+        div(span("Incorrect username or password"))
+      },
       footer = tagList(
         #modalButton("Cancel"),
         actionButton("ok", "OK")
@@ -96,42 +102,43 @@ shinyServer(function(input, output, session) {
           )
         })
         
-        # output$addLineButton <- renderUI({
-        #   actionButton("newRun", "Compare Run")
-        # })
-        
         observeEvent(input$newRun, {
-          runNumber = 2
-          runs <- names(result[["runs"]])
-          insertUI(
-            selector = "#newRun",
-            where = "afterEnd",
-            ui = selectInput("run2", "Choose a second run:",
-                        runs
+          if (runNumber == 0) {
+            runNumber <<- 2
+            runs <- names(result[["runs"]])
+            insertUI(
+              selector = "#newRun",
+              where = "beforeBegin",
+              ui = selectInput("run2", "Choose a second run:",
+                          runs
+              )
             )
-          )
-          removeUI(
-            selector = "#newRun"
-          )
+            updateActionButton(session, "newRun", label = "Remove Second Run")
+          } else if (runNumber == 1) {
+            runNumber <<- 2
+            updateActionButton(session, "newRun", label = "Remove Second Run")
+          } else if (runNumber == 2) {
+            runNumber <<- 1
+            updateActionButton(session, "newRun", label = "Graph Second Run")
+          }
         })
         
 
         dataInput <- reactive({
-          invalidateLater(6000, session)
+          invalidateLater(1000, session)
           print("data_is_changing")
           result <- download(projectURL = "https://telemetryapp2.firebaseio.com", fileName = user)
           return(result)
         })
         
         output$graph1=renderPlotly({
-          invalidateLater(6000, session)
+          invalidateLater(1000, session)
           result<-dataInput()
           print("graph_is_changing")
           
           user_result<-result[["runs"]][[input$run]]
-          
-          if (runNumber == 1) {
-            #  switching function
+          #  switching function
+          if (runNumber == 1 || runNumber == 0) {
             for(i in 1:length(type)){
               if(type[i]==input$type){
                 user_type_result<-user_result[i]
@@ -150,35 +157,32 @@ shinyServer(function(input, output, session) {
             }
             
             plot_ly (x = vector_x2,y = vector_y2, type = 'scatter', mode = 'lines' )
+          } else {
+            user_result2<-result[["runs"]][[input$run2]] 
+            #  switching function 
+            for(i in 1:length(type)){ 
+              if(type[i]==input$type){ 
+                user_type_result<-user_result[i] 
+                user_type_result2<-user_result2[i] 
+              } 
+            } 
             
-          } else if (lineNumber == 2) {
-            user_result2<-result[["runs"]][[input$run2]]
-            #  switching function
-            for(i in 1:length(type)){
-              if(type[i]==input$type){
-                user_type_result<-user_result[i]
-                user_type_result2<-user_result2[i]
-              }
-            }
+            #define vector y 
+            for (i in 1:length(user_type_result[[1]])){ 
+              vector_y2[i]<-user_type_result[[1]][i] 
+              vector_y3[i]<-user_type_result2[[1]][i] 
+            } 
             
-            #define vector y
-            for (i in 1:length(user_type_result[[1]])){
-              vector_y2[i]<-user_type_result[[1]][i]
-              vextor_y3[i]<-user_type_result2[[1]][i]
-            }
+            user_time_result<-user_result["Time(s)"] 
             
-            user_time_result<-user_result["Time(s)"]
+            for (i in 1:length(user_time_result[[1]])){ 
+              vector_x2[i]<-user_time_result[[1]][i] 
+            } 
             
-            for (i in 1:length(user_time_result[[1]])){
-              vector_x2[i]<-user_time_result[[1]][i]
-            }
+            plot_ly (x = vector_x2,y = vector_y2, type = 'scatter', mode = 'lines', name = 'Run 1' ) %>% 
+              add_trace(y = vector_y3, name = 'Run 2', mode = 'lines') 
             
-            plot_ly (x = vector_x2,y = vector_y2, type = 'scatter', mode = 'lines' ) %>%
-              add_trace(y = vector_y3, name = 'trace 1', mode = 'lines+markers')
           }
-          
-          
-          
         })
         
         output$table <- DT::renderDataTable(
@@ -190,7 +194,7 @@ shinyServer(function(input, output, session) {
           )
         )
         
-      } else {print("Nope") }
+      } else {showModal(dataModal(failed = TRUE))}
     }
   })
   
